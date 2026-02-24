@@ -10,7 +10,7 @@ namespace TutorBookingSystem.Services
         {
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<SeedServices>>();
 
@@ -35,6 +35,11 @@ namespace TutorBookingSystem.Services
                     {
                         FirstName = "Jhon",
                         LastName = "Doe",
+                        DateOfBirth = new DateTime(1990, 1, 1),
+                        CreatedAt = DateTime.UtcNow,
+                        IsActive = true,
+                        City = "Johannesburg",
+                        Province = "Gauteng",
                         UserName = adminEmail,
                         NormalizedUserName = adminEmail.ToUpper(),
                         Email = adminEmail,
@@ -61,11 +66,11 @@ namespace TutorBookingSystem.Services
             }
         }
 
-        private static async Task AddRoleAsync(RoleManager<IdentityRole> roleManager, string roleName)
+        private static async Task AddRoleAsync(RoleManager<IdentityRole<int>> roleManager, string roleName)
         {
             if (!await roleManager.RoleExistsAsync(roleName))
             {
-                var result = await roleManager.CreateAsync(new IdentityRole(roleName));
+                var result = await roleManager.CreateAsync(new IdentityRole<int>(roleName));
                 if (!result.Succeeded)
                 {
                     throw new Exception($"Failed to create role '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
