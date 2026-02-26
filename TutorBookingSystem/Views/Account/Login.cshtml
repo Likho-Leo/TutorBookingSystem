@@ -10,7 +10,7 @@
 	<div class="account-box">
 		<h2 class="text-center mb-4">Login</h2>
 
-		<form asp-action="login" method=" post">
+		<form asp-action="Login" method="post">
 			@Html.AntiForgeryToken()
 			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 			<div class="mb-3">
@@ -22,7 +22,7 @@
 			<div class="mb-3">
 				<label asp-for="Password" class="form-label"></label>
 				<input asp-for="Password" class="form-control" />
-				<span asp-validation-for="Password" class="=text-danger"></span>
+				<span asp-validation-for="Password" class="text-danger"></span>
 			</div>
 
 			<div class="float-end">
