@@ -13,6 +13,16 @@ namespace TutorBookingSystem.ViewModels
         [Display(Name = "Last Name")]
         public String LastName { get; set; }
 
+        [Required(ErrorMessage = "Date of Birth is required.")]
+        [Display(Name ="Date of Birth")]
+        public DateTime DateOfBirth { get; set; }
+
+        [Required(ErrorMessage = "Date of Birth is required.")]
+        public string City { get; set; }
+
+        [Required(ErrorMessage = "Date of Birth is required.")]
+        public string Province { get; set; }
+
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress]
         public string Email { get; set; }

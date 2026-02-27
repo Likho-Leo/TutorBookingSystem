@@ -14,6 +14,8 @@
 			@Html.AntiForgeryToken()
 			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+			<p class="mt-2">Personal Details</p>
+			<hr />
 			<div class="mb-3">
 				<label asp-for="FirstName" class="form-label"></label>
 				<input asp-for="FirstName" class="form-control" />
@@ -26,6 +28,26 @@
 				<span asp-validation-for="LastName" class="text-danger"></span>
 			</div>
 
+			<div class="mb-3">
+				<label asp-for="DateOfBirth" class="form-label"></label>
+				<input asp-for="DateOfBirth" class="form-control" type="date" />
+				<span asp-validation-for="DateOfBirth" class="text-danger"></span>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="City" class="form-label"></label>
+				<input asp-for="City" class="form-control" />
+				<span asp-validation-for="City" class="text-danger"></span>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="Province" class="form-label"></label>
+				<input asp-for="Province" class="form-control" />
+				<span asp-validation-for="Province" class="text-danger"></span>
+			</div>
+
+			<p class="mt-2">Account Details</p>
+			<hr />
 			<div class="mb-3">
 				<label asp-for="Email" class="form-label"></label>
 				<input asp-for="Email" class="form-control" />
