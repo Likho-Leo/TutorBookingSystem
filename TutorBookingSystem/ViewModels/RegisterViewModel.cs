@@ -5,8 +5,13 @@ namespace TutorBookingSystem.ViewModels
 {
     public class RegisterViewModel
     {
-        [Required(ErrorMessage = "Name is requireed.")]
-        public String Name { get; set; }
+        [Required(ErrorMessage = "First name is requireed.")]
+        [Display(Name ="First Name")]
+        public String FirstName { get; set; }
+
+        [Required(ErrorMessage = "Last name is requireed.")]
+        [Display(Name = "Last Name")]
+        public String LastName { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress]
