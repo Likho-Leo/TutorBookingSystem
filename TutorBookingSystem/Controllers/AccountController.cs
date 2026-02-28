@@ -100,5 +100,33 @@ namespace TutorBookingSystem.Controllers
 
             return View(model);
         }
+
+        [HttpGet]
+        public IActionResult VerifyEmail()
+        { 
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult>VerifyEmail(VerifyEmailViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await userManager.FindByNameAsync(model.Email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found.");
+                return View(model);
+            }
+            else
+            {
+                return RedirectToAction("ChangePassword", "Account", new { userName = user.UserName });
+            }
+        }
     }
 }
