@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 using TutorBookingSystem.Models;
+using TutorBookingSystem.Services;
 using TutorBookingSystem.ViewModels;
 
 namespace TutorBookingSystem.Controllers
@@ -10,14 +13,16 @@ namespace TutorBookingSystem.Controllers
         private readonly SignInManager<User> signInManager;
         private readonly UserManager<User> userManager;
         private readonly RoleManager<IdentityRole<int>> roleManager;
+        private readonly IEmailService emailService;
 
-        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager)
+        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, IEmailService emailService)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
+            this.emailService = emailService;
         }
-
+        
         [HttpGet]
         public IActionResult Login()
         { 
@@ -79,6 +84,19 @@ namespace TutorBookingSystem.Controllers
 
             if (result.Succeeded)
             {
+                //Generate confirmation token
+                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                var confirmationLink = Url.Action(
+                     "ConfirmEmail",
+                     "Account",
+                     new { userId = user.Id, token = token },
+                     Request.Scheme
+                );
+
+                await emailService.SendAsync(user.Email, "Confirm your email", $"Click here to confirm your email: {confirmationLink}");
+
+                //Add role
                 var roleExist = await roleManager.RoleExistsAsync("User");
 
                 if (!roleExist)
@@ -102,6 +120,36 @@ namespace TutorBookingSystem.Controllers
         }
 
         [HttpGet]
+        public IActionResult EmailConfirmed()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> ConfirmEmail(int userId, string token)
+        {
+            if (userId == 0 || token == null)
+            {
+                return BadRequest();
+            }
+
+            var user = await userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = await userManager.ConfirmEmailAsync(user, token);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest("Invalid or expired token");
+            }
+
+            return View("EmailConfirmed");
+        }
+
+        [HttpGet]
         public IActionResult VerifyEmail()
         { 
             return View();
@@ -116,7 +164,7 @@ namespace TutorBookingSystem.Controllers
                 return View(model);
             }
 
-            var user = await userManager.FindByNameAsync(model.Email);
+            var user = await userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
             {
@@ -125,8 +173,89 @@ namespace TutorBookingSystem.Controllers
             }
             else
             {
-                return RedirectToAction("ChangePassword", "Account", new { userName = user.UserName });
+                var token = await userManager.GeneratePasswordResetTokenAsync(user);
+                //encode token to prevent url from braking beacuse of +- signs
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+                var link = Url.Action(
+                    "ChangePassword",
+                    "Account",
+                    new { userId = user.Id, token = encodedToken },
+                    Request.Scheme
+                );
+
+                await emailService.SendAsync(user.Email, "Reset your password", $"Click here to reset your password: {link}");
+
+                return RedirectToAction("TokenSent", "Account", new { userName = user.UserName });
             }
+        }
+
+        public IActionResult TokenSent()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult ChangePassword(int userId, string token)
+        {
+            if (userId == 0 || string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("VerifyEmail", "Account");
+            }
+
+            var model = new ChangePasswordViewModel
+            {
+                UserId = userId,
+                Token = token
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await userManager.FindByIdAsync(model.UserId.ToString());
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found");
+                return View(model);
+            }
+
+            //Decode the token 
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Token));
+
+            var result = await userManager.ResetPasswordAsync(
+                user,
+                decodedToken,
+                model.NewPassword
+            );
+
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View(model);
         }
     }
 }

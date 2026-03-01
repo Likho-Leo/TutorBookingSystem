@@ -11,10 +11,12 @@ builder.Services.AddControllersWithViews();
 
 //register DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-options.UseSqlServer(connectionString));
+//register email service
+builder.Services.AddScoped<IEmailService, EmailService>();
 
+//password config
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
     options.Password.RequireDigit = true;
@@ -23,7 +25,7 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
     options.Password.RequireUppercase = true;
     options.User.RequireUniqueEmail = true;
     options.SignIn.RequireConfirmedAccount = false;
-    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedEmail = true; //force email confirmation before login
     options.SignIn.RequireConfirmedPhoneNumber = false;
 })
     .AddEntityFrameworkStores<AppDbContext>()
@@ -31,6 +33,7 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 
 var app = builder.Build();
 
+//register seed service
 await SeedServices.SeedData(app.Services);
 
 // Configure the HTTP request pipeline.
