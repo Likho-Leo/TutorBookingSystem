@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TutorBookingSystem.Models;
 
@@ -19,6 +20,24 @@ namespace TutorBookingSystem.Controllers
         }
 
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult Admin()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Student")]
+        public IActionResult Student()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Tutor")]
+        public IActionResult Tutor()
         {
             return View();
         }
