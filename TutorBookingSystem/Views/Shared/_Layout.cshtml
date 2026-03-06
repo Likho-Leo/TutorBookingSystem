@@ -29,10 +29,19 @@
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a asp-controller="Home" asp-action="Admin">Admin</a>
-                                <a asp-controller="AdminController" asp-action="ApproveTutors">Approve Tutors</a>
-                                <a asp-controller="AdminController" asp-action="ManageUsers">Manage Users</a>
-                                <a asp-controller="AdminController" asp-action="ViewStats">View Statistics</a>
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Admin">Admin</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="AdminController" asp-action="ApproveTutors">Approve Tutors</a>
+                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="AdminController" asp-action="ManageUsers">Manage Users</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="AdminController" asp-action="ViewStats">View Statistics</a>
                             </li>    
                         }
 
